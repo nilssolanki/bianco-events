@@ -34,7 +34,7 @@ function manageEvents(el, evList, cb, method, options) {
     if (cb) {
       el[method](e, cb, false, options)
     }
-    manageListeners(el, elListeners, e, cb, method === 'addEventListener')
+    manageListeners(el, e, cb, method === 'addEventListener')
   })
 }
 
