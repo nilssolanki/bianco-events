@@ -49,6 +49,10 @@ function manageListeners(el, eventName, cb, method, options) {
   
   if (isAdd(method) || cb) {
     el[method](eventName, cb, false, options)
+  } else {
+    eventListeners.forEach((lcb) => {
+      el[method](eventName, lcb)
+    })
   }
   
   if (isAdd(method)) {
@@ -57,9 +61,6 @@ function manageListeners(el, eventName, cb, method, options) {
     const cbIndex = eventListeners.indexOf(cb)
     eventListeners.splice(cbIndex, 1)
   } else {
-    eventListeners.forEach((lcb) => {
-      el[method](eventName, lcb)
-    })
     Reflect.deleteProperty(elListeners, eventName)
   }
 }
