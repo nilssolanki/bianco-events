@@ -27,14 +27,11 @@ const isAdd = methodName => methodName === 'addEventListener'
  */
 function manageEvents(el, evList, cb, method, options) {
   if (!listeners.has(el)) {
-    listeners.set(el, {})
+    listeners.set(el, Object.create(null))
   }
   
   split(evList).forEach((e) => {
-    if (cb) {
-      el[method](e, cb, false, options)
-    }
-    manageListeners(el, e, cb, method)
+    manageListeners(el, e, cb, method, options)
   })
 }
 
@@ -43,11 +40,16 @@ function manageEvents(el, evList, cb, method, options) {
  * @param   { HTMLElement } el     - The current DOM node
  * @param   { String }      eventName - the name of the current event
  * @param   { Function }    cb     - The callback for the current event
- * @returns { Boolean } method – either 'addEventListener' or 'removeEventListener'
+ * @param { String } method – either 'addEventListener' or 'removeEventListener'
+ *  @param   { Object }      options - the event listener options
  */
-function manageListeners(el, eventName, cb, method) {
+function manageListeners(el, eventName, cb, method, options) {
   const elListeners = listeners.get(el)
   const eventListeners = elListeners[eventName] = elListeners[eventName] || []
+  
+  if (isAdd(method) || cb) {
+    el[method](eventName, cb, false, options)
+  }
   
   if (isAdd(method)) {
     eventListeners.push(cb)
