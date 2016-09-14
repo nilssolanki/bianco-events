@@ -11,6 +11,13 @@ const listeners = new WeakMap()
 const split = list => list.split(/\s/)
 
 /**
+ * Check if the action is add
+ * @param   { String } methodName - method name
+ * @returns { Boolean } is it an add event
+ */
+const isAdd = evName => methodName === 'addEventListener'
+
+/**
  * Set a listener for all the events received separated by spaces
  * @param   { HTMLElement } el     - DOM node where the listeners will be bound
  * @param   { String }      evList - list of events we want to bind or unbind space separated
@@ -20,27 +27,38 @@ const split = list => list.split(/\s/)
  */
 function manageEvents(el, evList, cb, method, options) {
   if (!listeners.has(el)) {
-    listeners.set(el, {});
+    listeners.set(el, {})
   }
   
-  const elListeners = listeners.get(el);
-  
   split(evList).forEach((e) => {
-    el[method](e, cb, false, options)
-    manageListeners(elListeners, e, cb, method === 'addEventListener')
+    if (cb) {
+      el[method](e, cb, false, options)
+    }
+    manageListeners(el, elListeners, e, cb, method === 'addEventListener')
   })
 }
 
-function manageListeners(elListeners, evList, cb, isAdd) {
-  const eventListeners = elListeners[evList] = elListeners[evList] || []
+/**
+ * Add or remove listeners from the listener list
+ * @param   { HTMLElement } el     - The current DOM node
+ * @param   { String }      eventName - the name of the current event
+ * @param   { Function }    cb     - The callback for the current event
+ * @returns { Boolean } method – either 'addEventListener' or 'removeEventListener'
+ */
+function manageListeners(el, eventName, cb, method) {
+  const elListeners = listeners.get(el)
+  const eventListeners = elListeners[eventName] = elListeners[eventName] || []
   
-  if (isAdd) {
+  if (isAdd(method)) {
     eventListeners.push(cb)
   } else if (cb) {
     const cbIndex = eventListeners.indexOf(cb)
     eventListeners.splice(cbIndex, 1)
   } else {
-    Reflect.deleteProperty(elListeners, evList);
+    eventListeners.forEach((lcb) => {
+      el[method](el, eventName, lcb)
+    })
+    Reflect.deleteProperty(elListeners, eventName)
   }
 }
 
