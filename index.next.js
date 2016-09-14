@@ -15,7 +15,7 @@ const split = list => list.split(/\s/)
  * @param   { String } methodName - method name
  * @returns { Boolean } is it an add event
  */
-const isAdd = evName => methodName === 'addEventListener'
+const isAdd = methodName => methodName === 'addEventListener'
 
 /**
  * Set a listener for all the events received separated by spaces
@@ -34,7 +34,7 @@ function manageEvents(el, evList, cb, method, options) {
     if (cb) {
       el[method](e, cb, false, options)
     }
-    manageListeners(el, e, cb, method === 'addEventListener')
+    manageListeners(el, e, cb, method)
   })
 }
 
@@ -56,7 +56,7 @@ function manageListeners(el, eventName, cb, method) {
     eventListeners.splice(cbIndex, 1)
   } else {
     eventListeners.forEach((lcb) => {
-      el[method](el, eventName, lcb)
+      el[method](eventName, lcb)
     })
     Reflect.deleteProperty(elListeners, eventName)
   }
@@ -69,7 +69,7 @@ function manageListeners(el, eventName, cb, method) {
  * @param   { Function }    cb     - listeners callback
  * @returns { HTMLElement } DOM node and first argument of the function
  */
-export function add(el, evList, cb, options) {
+function add(el, evList, cb, options) {
   manageEvents(el, evList, cb, 'addEventListener', options)
   return el
 }
@@ -81,7 +81,7 @@ export function add(el, evList, cb, options) {
  * @param   { Function }    cb     - listeners callback
  * @returns { HTMLElement } DOM node and first argument of the function
  */
-export function once(el, evList, cb, options) {
+function once(el, evList, cb, options) {
   options = Object.assign(options, {
     once: true
   })
@@ -96,14 +96,7 @@ export function once(el, evList, cb, options) {
  * @param   { Function }    cb     - listeners callback
  * @returns { HTMLElement } DOM node and first argument of the function
  */
-export function remove(el, evList, cb) {
+function remove(el, evList, cb) {
   manageEvents(el, evList, cb, 'removeEventListener')
   return el
 }
-
-export default {
-  add,
-  once,
-  remove
-}
-
